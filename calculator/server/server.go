@@ -12,6 +12,26 @@ import (
 
 type server struct{}
 
+// PrimeNumberDecomposition implements calculatorgb.CalculatorServiceServer
+func (*server) PrimeNumberDecomposition(req *calculatorgb.PNDRequest, stream calculatorgb.CalculatorService_PrimeNumberDecompositionServer) error {
+
+	k := int32(2)
+	N := req.GetNumber()
+	for N > 1 {
+		if N % k == 0 {
+			N = N / k
+			// Send to client
+			stream.Send(&calculatorgb.PNDResponse{
+				Result: k,
+			})
+		} else {
+			k++
+			log.Printf("k increase to %v", k)
+		}
+	}
+	return nil
+}
+
 func (*server) Sum(ctx context.Context, req *calculatorgb.SumRequest) (*calculatorgb.SumResponse, error) {
 	log.Println("sum called...")
 	resp := &calculatorgb.SumResponse{
