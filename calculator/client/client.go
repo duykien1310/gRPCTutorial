@@ -139,6 +139,7 @@ func callFindMax(c calculatorgb.CalculatorServiceClient) {
 			}
 			time.Sleep(1000 * time.Millisecond)
 		}
+		stream.CloseSend()
 	}()
 
 	go func() {

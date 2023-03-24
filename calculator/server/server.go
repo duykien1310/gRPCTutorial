@@ -72,10 +72,10 @@ func (*server) Average(stream calculatorgb.CalculatorService_AverageServer) erro
 func (*server) PrimeNumberDecomposition(req *calculatorgb.PNDRequest, stream calculatorgb.CalculatorService_PrimeNumberDecompositionServer) error {
 
 	k := int32(2)
-	N := req.GetNumber()
-	for N > 1 {
-		if N%k == 0 {
-			N = N / k
+	n := req.GetNumber()
+	for n > 1 {
+		if n%k == 0 {
+			n = n / k
 			// Send to client
 			stream.Send(&calculatorgb.PNDResponse{
 				Result: k,
