@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	calculatorgb "grpcTutorial/calculator/calculatorpb"
+	"io"
 	"log"
 	"net"
 
@@ -12,13 +13,38 @@ import (
 
 type server struct{}
 
+// Average implements calculatorgb.CalculatorServiceServer
+func (*server) Average(stream calculatorgb.CalculatorService_AverageServer) error {
+	log.Println("Average called")
+	var total float32
+	var count int
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			//tinh trung binh va return cho client
+			resp := calculatorgb.AverageResponse{
+				Result: total / float32(count),
+			}
+
+			return stream.SendAndClose(&resp)
+		}
+		if err != nil {
+			log.Fatalf("err while Recv Average %v", err)
+		}
+
+		log.Println("receive num")
+		total += req.GetNum()
+		count++
+	}
+}
+
 // PrimeNumberDecomposition implements calculatorgb.CalculatorServiceServer
 func (*server) PrimeNumberDecomposition(req *calculatorgb.PNDRequest, stream calculatorgb.CalculatorService_PrimeNumberDecompositionServer) error {
 
 	k := int32(2)
 	N := req.GetNumber()
 	for N > 1 {
-		if N % k == 0 {
+		if N%k == 0 {
 			N = N / k
 			// Send to client
 			stream.Send(&calculatorgb.PNDResponse{
