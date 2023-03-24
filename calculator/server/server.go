@@ -13,6 +13,36 @@ import (
 
 type server struct{}
 
+// FindMax implements calculatorgb.CalculatorServiceServer
+func (*server) FindMax(stream calculatorgb.CalculatorService_FindMaxServer) error {
+	log.Println("Find max called...")
+	max := int32(0)
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			log.Println("EOF ...")
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("err while Recv Find Max %v", err)
+			return err
+		}
+
+		num := req.GetNum()
+		log.Printf("recv num %v", num)
+		if num > max {
+			max = num
+		}
+		err = stream.Send(&calculatorgb.FindMaxResponse{
+			Max: max,
+		})
+		if err != nil {
+			log.Fatalf("send max err %v", err)
+			return err
+		}
+	}
+}
+
 // Average implements calculatorgb.CalculatorServiceServer
 func (*server) Average(stream calculatorgb.CalculatorService_AverageServer) error {
 	log.Println("Average called")
