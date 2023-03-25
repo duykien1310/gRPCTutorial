@@ -6,12 +6,29 @@ import (
 	calculatorgb "grpcTutorial/calculator/calculatorpb"
 	"io"
 	"log"
+	"math"
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type server struct{}
+
+// Square implements calculatorgb.CalculatorServiceServer
+func (*server) Square(ctx context.Context, req *calculatorgb.SquareRequest) (*calculatorgb.SquareResponse, error) {
+	log.Println("Square called ...")
+	num := req.GetNum()
+	if num < 0 {
+		log.Printf("req num < 0, return InvalidAgrument")
+		return nil, status.Errorf(codes.InvalidArgument, "Expect num > 0, req num was %v", num)
+	}
+
+	return &calculatorgb.SquareResponse{
+		SquareRoot: math.Sqrt(float64(num)),
+	}, nil
+}
 
 // FindMax implements calculatorgb.CalculatorServiceServer
 func (*server) FindMax(stream calculatorgb.CalculatorService_FindMaxServer) error {

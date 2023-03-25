@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -24,7 +26,8 @@ func main() {
 	// callSum(client)
 	// callPND(client)
 	// callAverage(client)
-	callFindMax(client)
+	// callFindMax(client)
+	callSquareRoot(client, -4)
 }
 
 func callSum(c calculatorgb.CalculatorServiceClient) {
@@ -160,4 +163,26 @@ func callFindMax(c calculatorgb.CalculatorServiceClient) {
 	}()
 
 	<-waitc
+}
+
+func callSquareRoot(c calculatorgb.CalculatorServiceClient, num int32) {
+	log.Println("calling Square api")
+	resp, err := c.Square(context.Background(), &calculatorgb.SquareRequest{
+		Num: num,
+	})
+
+	if err != nil {
+		log.Fatalf("callSquare err %v", err)
+		if errStatus, ok := status.FromError(err); ok {
+			log.Printf("err msg: %v\n", errStatus.Message())
+			log.Printf("err code: %v\n", errStatus.Code())
+
+			if errStatus.Code() == codes.InvalidArgument {
+				log.Printf("invalidAgrument num %v", num)
+				return
+			}
+		}
+	}
+
+	log.Printf("Square response %v", resp.GetSquareRoot())
 }
