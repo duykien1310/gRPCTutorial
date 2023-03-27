@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -15,6 +16,25 @@ import (
 )
 
 type server struct{}
+
+// SumWithDeadLine implements calculatorgb.CalculatorServiceServer
+func (*server) SumWithDeadLine(ctx context.Context, req *calculatorgb.SumRequest) (*calculatorgb.SumResponse, error) {
+	log.Println("sum with deadline called...")
+
+	for i := 0; i < 3; i++ {
+		if ctx.Err() == context.Canceled {
+			log.Println("context Canceled ...")
+			return nil, status.Errorf(codes.Canceled, "client canceled request")
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+	resp := &calculatorgb.SumResponse{
+		Result: req.GetNum1() + req.GetNum2(),
+	}
+
+	return resp, nil
+}
 
 // Square implements calculatorgb.CalculatorServiceServer
 func (*server) Square(ctx context.Context, req *calculatorgb.SquareRequest) (*calculatorgb.SquareResponse, error) {
